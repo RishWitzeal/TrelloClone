@@ -23,7 +23,8 @@ public class TodoTable {
     private Date todoCreateTime;
     @Column(name = "todocompletetime")
     private Date todoCompleteTime;
-
+    @Column(name = "tododuedate")
+    private Date todoDueDate;
 
 
     public int gettID() {
@@ -75,4 +76,24 @@ public class TodoTable {
     }
 
 
+    public Date getTodoDueDate() {
+        return todoDueDate;
+    }
+
+    public void setTodoDueDate(Date todoDueDate) {
+        this.todoDueDate = todoDueDate;
+    }
+
+    @Override
+    public String toString() {
+        return "TodoTable{" +
+                "tID=" + tID +
+                ", status='" + status + '\'' +
+                ", heading='" + heading + '\'' +
+                ", description='" + description + '\'' +
+                ", todoCreateTime=" + todoCreateTime +
+                ", todoCompleteTime=" + todoCompleteTime +
+                ", todoDueDate=" + todoDueDate +
+                '}';
+    }
 }

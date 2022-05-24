@@ -1,11 +1,9 @@
 package com.rishabh.trelloclone.controller;
 
 import com.rishabh.trelloclone.entities.TodoTable;
-import com.rishabh.trelloclone.entities.Todo_UserModel;
 import com.rishabh.trelloclone.payloads.AssignTodoPayLoad;
 import com.rishabh.trelloclone.payloads.CreateTodoPayload;
 import com.rishabh.trelloclone.payloads.UpdateStatusPayLoad;
-import com.rishabh.trelloclone.entities.User;
 import com.rishabh.trelloclone.service.TodoUserService;
 import com.rishabh.trelloclone.service.Todo_UserModelService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -43,7 +42,7 @@ public class TodoController {
             @ApiResponse(responseCode = "400", description = "Secret Key is Wrong",
                     content = @Content) })
     @PostMapping("/createTodo")
-    public ResponseEntity<Map<String,String>> createTodo(@RequestHeader("userId") String userId, @RequestHeader("secretKey") String secretKey, @RequestBody CreateTodoPayload todoJsonPayload){
+    public ResponseEntity<Map<String,String>> createTodo(@RequestHeader("userId") String userId, @RequestHeader("secretKey") String secretKey, @RequestBody CreateTodoPayload todoJsonPayload) throws ParseException {
         logger.info("Checking the header validations");
         String responseToBeReturned = "";
         Map<String,String> map= new HashMap<>();
@@ -111,20 +110,22 @@ public class TodoController {
             @ApiResponse(responseCode = "400", description = "Wrong Secret Key Or UserId",
                     content = @Content) })
     @GetMapping("/getAllTodoWithStatus")
-    public  ResponseEntity<List<Map<String,String>>> getALLTodoWithStatus(@RequestHeader("userId") String userId, @RequestHeader("secretKey") String secretKey){
+    public ResponseEntity<HashMap<String, List<HashMap<String, String>>>> getALLTodoWithStatus(@RequestHeader("userId") String userId, @RequestHeader("secretKey") String secretKey){
         logger.info("Getting the status of All Todos");
-        List<Map<String,String>> mapList = new ArrayList<>();
+//        List<HashMap<String,String>> mapList = new Arraylist<>();
+        HashMap<String,List<HashMap<String,String>>> mapList = new HashMap<>();
         if(todoUserService.theRequestHeaderIsValid(userId, secretKey)){
-            List<Map<String,String>> ans = todoUserService.allTodoWithStatus();
-            return ResponseEntity.status(HttpStatus.FOUND).body(ans);
+            mapList = todoUserService.allTodoWithStatus();
+            return ResponseEntity.status(HttpStatus.FOUND).body(mapList);
         }
-        else {
-            logger.error("Problem in the Input Header");
-            Map<String,String> map = new HashMap<>();
-            map.put("Status","Problem in the Input Header");
-            mapList.add(map);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapList);
-        }
+//        else {
+//            logger.error("Problem in the Input Header");
+//            Map<String,String> map = new HashMap<>();
+//            map.put("Status","Problem in the Input Header");
+//            mapList.add(map);
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapList);
+//        }
+        return ResponseEntity.status(HttpStatus.OK).body(mapList);
     }
     @Operation(summary = "updating todos")
     @ApiResponses(value = {

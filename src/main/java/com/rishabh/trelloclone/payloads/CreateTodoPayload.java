@@ -1,19 +1,14 @@
 package com.rishabh.trelloclone.payloads;
 
+import java.sql.Date;
+
 public class CreateTodoPayload {
 
-    private String status;
+    private String mustBeCompletedBy;
     private String heading;
     private String description;
 
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public String getHeading() {
         return heading;
@@ -31,10 +26,19 @@ public class CreateTodoPayload {
         this.description = description;
     }
 
+
+    public String getMustBeCompletedBy() {
+        return mustBeCompletedBy;
+    }
+
+    public void setMustBeCompletedBy(String mustBeCompletedBy) {
+        this.mustBeCompletedBy = mustBeCompletedBy;
+    }
+
     @Override
     public String toString() {
         return "CreateTodoPayload{" +
-                "status='" + status + '\'' +
+                "mustBeCompleted=" + mustBeCompletedBy +
                 ", heading='" + heading + '\'' +
                 ", description='" + description + '\'' +
                 '}';

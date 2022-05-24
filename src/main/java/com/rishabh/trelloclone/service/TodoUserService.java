@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -32,7 +34,7 @@ public class TodoUserService {
     @Autowired
     private Todo_UserModelRepository todo_userModelRepository;
 
-    public TodoTable createTodo(CreateTodoPayload todoPayload) {
+    public TodoTable createTodo(CreateTodoPayload todoPayload) throws ParseException {
         logger.info("Create todo method starts in the service");
         TodoTable newTodo = new TodoTable();
         newTodo.setStatus("Created");
@@ -40,6 +42,9 @@ public class TodoUserService {
         newTodo.setDescription(todoPayload.getDescription());
         newTodo.setTodoCreateTime(new Date());
         newTodo.setTodoCompleteTime(null);
+        String dueDate =  todoPayload.getMustBeCompletedBy();
+        Date dateToBeAddedInDB = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dueDate);
+        newTodo.setTodoDueDate(dateToBeAddedInDB);
         todoTableRepository.save(newTodo);
         return newTodo;
     }
@@ -138,22 +143,54 @@ public class TodoUserService {
          }
         return "Something needs to be done!!!";
     }
-    public List<Map<String,String>> allTodoWithStatus() {
+    public HashMap<String,List<HashMap<String,String>>> allTodoWithStatus() {
         logger.info("Returning map of tid and status of todos");
-        List<Map<String,String>> mapList = new ArrayList<>();
+//        List<Map<String,String>> mapList = new ArrayList<>();
+        HashMap<String,List<HashMap<String,String>>> mapHashMap = new HashMap<>();
         List<TodoTable> allTodoObj = todoTableRepository.findAllTodos();
 //        allTodoObj.stream().forEach((todo) -> map.put(String.valueOf(todo.getHeading()),todo.getStatus()));
+        List<HashMap<String,String>> completedStatusMapList = new ArrayList<>();
+        List<HashMap<String,String>> pendingStatusMapList = new ArrayList<>();
+        List<HashMap<String,String>> createdStatusMapList = new ArrayList<>();
         int indx =0 ;
         while(indx<allTodoObj.size()){
-            Map<String,String> map = new HashMap<>();
-            map.put("Status",allTodoObj.get(indx).getStatus());
-            map.put("Heading",allTodoObj.get(indx).getHeading());
-            map.put("tid",String.valueOf(allTodoObj.get(indx).gettID()));
-            mapList.add(map);
+            if(allTodoObj.get(indx).getStatus().equals("Completed")) {
+                HashMap<String, String> map = new HashMap();
+                map.put("Status", allTodoObj.get(indx).getStatus());
+                map.put("Heading", allTodoObj.get(indx).getHeading());
+                map.put("tid", String.valueOf(allTodoObj.get(indx).gettID()));
+                map.put("createdTime", String.valueOf(allTodoObj.get(indx).getTodoCreateTime()));
+                map.put("dueDateTime",String.valueOf(allTodoObj.get(indx).getTodoDueDate()));
+                map.put("completedTime",String.valueOf(allTodoObj.get(indx).getTodoCompleteTime()));
+                completedStatusMapList.add(map);
+            }
+            else if(allTodoObj.get(indx).getStatus().equals("Pending")){
+                HashMap<String, String> map = new HashMap();
+                map.put("Status", allTodoObj.get(indx).getStatus());
+                map.put("Heading", allTodoObj.get(indx).getHeading());
+                map.put("tid", String.valueOf(allTodoObj.get(indx).gettID()));
+                map.put("createdTime", String.valueOf(allTodoObj.get(indx).getTodoCreateTime()));
+                map.put("dueDateTime",String.valueOf(allTodoObj.get(indx).getTodoDueDate()));
+                map.put("completedTime",null);
+                pendingStatusMapList.add(map);
+            }
+            else{
+                HashMap<String, String> map = new HashMap();
+                map.put("Status", allTodoObj.get(indx).getStatus());
+                map.put("Heading", allTodoObj.get(indx).getHeading());
+                map.put("tid", String.valueOf(allTodoObj.get(indx).gettID()));
+                map.put("createdTime", String.valueOf(allTodoObj.get(indx).getTodoCreateTime()));
+                map.put("dueDateTime",String.valueOf(allTodoObj.get(indx).getTodoDueDate()));
+                map.put("completedTime",null);
+                createdStatusMapList.add(map);
+            }
             indx++;
+            mapHashMap.put("Completed",completedStatusMapList);
+            mapHashMap.put("Pending",pendingStatusMapList);
+            mapHashMap.put("Created",createdStatusMapList);
         }
-        return mapList;
-
+ //       return mapList;
+        return mapHashMap;
     }
 
     public Map<String, String> updateStatus(UpdateStatusPayLoad statusPayLoad) {
